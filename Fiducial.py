@@ -9,9 +9,15 @@ class Fiducial:
         self._filtered = None
         self._coordinates = None
 
-    def preview(self, size=(4, 4), cmap="gray"):
+    def preview(self, size=(4, 4), cmap="gray", filtered=False):
         _, ax = plt.subplots(figsize=size)
-        ax.imshow(self.img, cmap=cmap)
+
+        if filtered and self._filtered is not None:
+            img = self._filtered
+        else:
+            img = self.img
+
+        ax.imshow(img, cmap=cmap)
 
         if self._coordinates:
             ax.plot(self._coordinates[0], self._coordinates[1],
@@ -24,18 +30,21 @@ class Fiducial:
         """
         kernel = np.ones((kernel_size, kernel_size), np.uint8)
 
+        img = cv2.normalize(self.img, None, alpha=0, beta=255,
+                            norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+
         filtered = cv2.morphologyEx(
-            self.img, cv2.MORPH_OPEN, kernel, iterations=iterations)
+            img, cv2.MORPH_OPEN, kernel, iterations=iterations)
 
         if threshold:
-            filtered = cv2.adaptiveThreshold(filtered, self.img.max(
+            filtered = cv2.adaptiveThreshold(filtered, filtered.max(
             ), cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, block_size, 0)
 
         return filtered
 
     def _calculate_coordinates(self, kernel_size, iterations, threshold, block_size):
         """
-        Perform image filtering and corner finding.
+        Perform image filtering and corner finding to locate the fiducial coordinates.
         """
         self._filtered = self._filter(
             kernel_size, iterations, threshold, block_size)
