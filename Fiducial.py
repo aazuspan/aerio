@@ -4,9 +4,10 @@ import numpy as np
 
 
 class Fiducial:
-    def __init__(self, img):
+    def __init__(self, img, position):
         self.img = img
         self._filtered = None
+        self._position = position
         self._coordinates = None
 
     def preview(self, size=(4, 4), cmap="gray", filtered=False):
@@ -51,7 +52,7 @@ class Fiducial:
 
         self._coordinates = self._locate_corner()
 
-        return self.coordinates
+        return self._image_coordinates
 
     def _locate_corner(self):
         """
@@ -64,6 +65,12 @@ class Fiducial:
         return (corner[0][0][0], corner[0][0][1])
 
     @property
+    def _image_coordinates(self):
+        """
+        Convert the local cropped coordinates to coordinates within the image.
+        """
+        return (self._position[1] + self._coordinates[0], self._position[0] + self._coordinates[1])
+
+    @property
     def coordinates(self):
-        # TODO: Convert the coordinates from relative coordinates to the global image coordinates
-        return self._coordinates
+        return self._image_coordinates

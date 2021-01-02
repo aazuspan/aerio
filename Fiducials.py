@@ -42,26 +42,36 @@ class Fiducials:
 
         return coordinates
 
-    def _extract_fiducial(self, img, position, size):
+    def _get_fiducial_bbox(self, img, position, size):
         """
-        Crop and return a single fiducial from the image.
+        Calculate the coordinates of the bounding box for a fiducial.
         """
-        # Rotate the image to put the proper fiducial at the top
-        img = np.rot90(img, position)
-
         img_width = img.shape[0]
+        img_height = img.shape[1]
 
-        top = 0
-        bottom = size[0]
-        left = img_width // 2 - size[1] // 2
-        right = img_width // 2 + size[1] // 2
+        if position in [self.TOP, self.BOTTOM]:
+            left = img_width // 2 - size[1] // 2
+            right = img_width // 2 + size[1] // 2
 
-        crop = img[top:bottom, left:right]
+            if position == self.TOP:
+                top = 0
+                bottom = size[0]
+            else:
+                top = img_height - size[0]
+                bottom = img_height
 
-        # Undo the image rotation
-        crop = np.rot90(crop, 4 - position)
+        elif position in [self.RIGHT, self.LEFT]:
+            top = img_height // 2 - size[1] // 2
+            bottom = img_height // 2 + size[1] // 2
 
-        return crop
+            if position == self.RIGHT:
+                left = img_width - size[0]
+                right = img_width
+            else:
+                left = 0
+                right = size[0]
+
+        return (top, bottom, left, right)
 
     def _calculate_fiducials(self, img, size):
         """
@@ -70,7 +80,10 @@ class Fiducials:
         fiducials = []
 
         for position in [self.TOP, self.RIGHT, self.BOTTOM, self.LEFT]:
-            fiducial_crop = self._extract_fiducial(self.img, position, size)
-            fiducials.append(Fiducial(fiducial_crop))
+            bbox = self._get_fiducial_bbox(self.img, position, size)
+            crop = self.img[bbox[0]:bbox[1], bbox[2]:bbox[3]]
+            # Top-left corner coordinates for the fiducial
+            position = (bbox[0], bbox[2])
+            fiducials.append(Fiducial(crop, position))
 
         return fiducials

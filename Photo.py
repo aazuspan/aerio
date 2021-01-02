@@ -135,3 +135,8 @@ class Photo:
     def preview(self, size=(8, 8), cmap="gray"):
         _, ax = plt.subplots(figsize=size)
         ax.imshow(self.img, cmap=cmap)
+
+        if self.fiducials and self.fiducials.coordinates:
+            for coord in self.fiducials.coordinates:
+                ax.plot(coord[0], coord[1], marker="+",
+                        color="yellow", markersize=20)
