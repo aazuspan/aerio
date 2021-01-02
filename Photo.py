@@ -6,6 +6,7 @@ import statistics
 from Fiducials import Fiducials
 
 
+# TODO: Raise warning if fiducial coordinates can't be located. Format coordinates for Agisoft.
 class Photo:
     def __init__(self, path, dpi=None, photo_size=None, pixel_size=None):
         self.path = path
