@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import statistics
 
-from Fiducials import Fiducials
+from modules.Fiducials import Fiducials
 
 
 # TODO: Raise warning if fiducial coordinates can't be located. Format coordinates for Agisoft.
