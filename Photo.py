@@ -3,20 +3,32 @@ import matplotlib.pyplot as plt
 import os
 import statistics
 
+from Fiducials import Fiducials
+
 
 class Photo:
     def __init__(self, path, dpi=None, photo_size=None, pixel_size=None):
         self.path = path
-        self.img = cv2.imread(self.path)
+        self.img = cv2.imread(self.path, 0)
 
         self._dpi = dpi
         self._photo_size = photo_size
         self._pixel_size = pixel_size
 
+        self._fiducials = None
+
         if self._is_underdefined():
             raise AttributeError("This photo is under-defined. You must specify"
                                  " either dpi, photo_size, or pixel_size so that"
                                  " others can be calculated.")
+
+    def calculate_fiducials(self, fiducial_size):
+        self._fiducials = Fiducials(self.img, fiducial_size)
+        return self._fiducials
+
+    @property
+    def fiducials(self):
+        return self._fiducials
 
     def _is_underdefined(self):
         """
