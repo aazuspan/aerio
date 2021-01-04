@@ -16,16 +16,12 @@ class Photo:
         self._photo_size = photo_size
         self._pixel_size = pixel_size
 
-        self._fiducials = None
+        self._fiducials = Fiducials(self.img)
 
         if self._is_underdefined():
             raise AttributeError("This photo is under-defined. You must specify"
                                  " either dpi, photo_size, or pixel_size so that"
                                  " others can be calculated.")
-
-    def calculate_fiducials(self, fiducial_size):
-        self._fiducials = Fiducials(self.img, fiducial_size)
-        return self._fiducials
 
     @property
     def fiducials(self):
@@ -137,7 +133,4 @@ class Photo:
         _, ax = plt.subplots(figsize=size)
         ax.imshow(self.img, cmap=cmap)
 
-        if self.fiducials and self.fiducials.coordinates:
-            for coord in self.fiducials.coordinates:
-                ax.plot(coord[0], coord[1], marker="+",
-                        color="yellow", markersize=20)
+        self.fiducials._add_to_preview(ax)

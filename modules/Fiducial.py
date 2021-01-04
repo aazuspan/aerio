@@ -74,3 +74,9 @@ class Fiducial:
     @property
     def coordinates(self):
         return self._image_coordinates
+
+    def _add_to_preview(self, ax):
+        coord = self.coordinates
+        if coord:
+            ax.plot(coord[0], coord[1], marker="+",
+                    color="yellow", markersize=20)

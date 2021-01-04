@@ -10,14 +10,57 @@ class Fiducials:
     BOTTOM = 2
     LEFT = 3
 
-    def __init__(self, img, size):
+    def __init__(self, img):
         self.img = img
-        self.size = size
 
-        self.top, self.right, self.bottom, self.left = self._calculate_fiducials(
-            self.img, self.size)
+        self.fiducials = [None for i in range(4)]
 
-    def calculate_coordinates(self, kernel_size=None, iterations=4, threshold=False, block_size=999):
+    @property
+    def top(self):
+        return self.fiducials[0]
+
+    @property
+    def right(self):
+        return self.fiducials[1]
+
+    @property
+    def bottom(self):
+        return self.fiducials[2]
+
+    @property
+    def left(self):
+        return self.fiducials[3]
+
+    def locate(self, size, kernel_size=None, iterations=4, threshold=False, block_size=999):
+        """
+        Extract fiducials from image and store. Filter fiducials and use corner-finding to locate
+        exact fiducial positions.
+        """
+        self.fiducials = self._crop_fiducials(size)
+
+        return self._calculate_coordinates(kernel_size, iterations, threshold, block_size)
+
+    def _add_to_preview(self, ax):
+        for fiducial in self.fiducials:
+            if fiducial:
+                fiducial._add_to_preview(ax)
+
+    def _crop_fiducials(self, size):
+        """
+        Extract, instantiate, and return all four fiducials
+        """
+        fiducials = []
+
+        for position in [self.TOP, self.RIGHT, self.BOTTOM, self.LEFT]:
+            bbox = self._get_fiducial_bbox(self.img, position, size)
+            crop = self.img[bbox[0]:bbox[1], bbox[2]:bbox[3]]
+            # Top-left corner coordinates for the fiducial
+            position = (bbox[0], bbox[2])
+            fiducials.append(Fiducial(crop, position))
+
+        return fiducials
+
+    def _calculate_coordinates(self, kernel_size, iterations, threshold, block_size):
         """
         Run image processing and corner finding to locate coordinates of each fiducial corner
         """
@@ -34,11 +77,15 @@ class Fiducials:
     @property
     def coordinates(self):
         """
-        Return the corner coordinates of each fiducial (top, right, bottom, left)
+        Return the corner coordinates of each fiducial (top, right, bottom, left). Returns None
+        for any fiducial that has not been located.
         """
         coordinates = []
         for fiducial in [self.top, self.right, self.bottom, self.left]:
-            coordinates.append(fiducial.coordinates)
+            if not fiducial:
+                coordinates.append(None)
+            else:
+                coordinates.append(fiducial.coordinates)
 
         return coordinates
 
@@ -72,18 +119,3 @@ class Fiducials:
                 right = size[0]
 
         return (top, bottom, left, right)
-
-    def _calculate_fiducials(self, img, size):
-        """
-        Extract, instantiate, and return all four fiducials
-        """
-        fiducials = []
-
-        for position in [self.TOP, self.RIGHT, self.BOTTOM, self.LEFT]:
-            bbox = self._get_fiducial_bbox(self.img, position, size)
-            crop = self.img[bbox[0]:bbox[1], bbox[2]:bbox[3]]
-            # Top-left corner coordinates for the fiducial
-            position = (bbox[0], bbox[2])
-            fiducials.append(Fiducial(crop, position))
-
-        return fiducials
