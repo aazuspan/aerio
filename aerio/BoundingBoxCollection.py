@@ -9,21 +9,40 @@ class BoundingBoxCollection:
     def __init__(self, boxes, photo):
         # The photo that contains the bounding boxes
         self.photo = photo
-        self.boxes = self.from_list(boxes)
 
-    def from_list(self, box_list):
+        self.boxes = self.load_boxes(boxes)
+
+    def load_boxes(self, boxes):
         """
-        Take a list of lists and convert it to a list of BoundingBox objects
+        Take a list of BoundingBox objects or coordinates and convert to a list of BoundingBox objects.
         """
-        boxes = []
+        loaded = []
 
-        for coord in box_list:
-            # Remove redundant dimensions
-            coord = np.squeeze(coord)
-            box = BoundingBox(coord, self)
-            boxes.append(box)
+        for box in boxes:
+            if isinstance(box, BoundingBox):
+                loaded.append(box)
+            elif isinstance(box, (list, tuple, np.ndarray)):
+                box = np.squeeze(box)
+                loaded.append(BoundingBox(box, self))
 
-        return boxes
+        return loaded
+
+    def __add__(self, other):
+        """
+        Combine two BoundingBoxCollections by joining their boxes
+        """
+        if isinstance(other, BoundingBoxCollection):
+            if self.photo != other.photo:
+                raise ValueError(
+                    "To combine two BoundingBoxCollections, they must use the same photo.")
+            other_boxes = self.load_boxes(other.boxes)
+        elif isinstance(other, (list, tuple, np.ndarray)):
+            other_boxes = self.load_boxes(other)
+        else:
+            raise ValueError("A BoundingBoxCollection can only be combined with another BoundingBoxCollection"
+                             " or a list of coordinate lists.")
+
+        return BoundingBoxCollection(self.boxes + other_boxes, self.photo)
 
     def generate_mask(self, bg=255, fg=0, dtype=np.uint8):
         """
@@ -90,4 +109,4 @@ class BoundingBoxCollection:
         contours, _ = cv2.findContours(
             255 - mask_collapsed, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-        self.boxes = self.from_list(contours)
+        self.boxes = self.load_boxes(contours)
