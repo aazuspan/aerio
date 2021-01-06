@@ -92,13 +92,11 @@ class Photo:
 
     # Print out all of the photo specs
     def __repr__(self):
-        return f"""
-        {self.filename}
-        Resolution (px): {self.height} (H) x {self.width} (W)
-        DPI: {round(self.dpi, 4)}
-        Size (mm): {round(self.photo_size[0], 4)} (H) x {round(self.photo_size[1], 4)} (W)
-        Pixel size (mm): {round(self.pixel_size[0], 4)} (H) x {round(self.pixel_size[1], 4)} (W)
-        """
+        return f"{self.filename}\n"\
+            f"Resolution (px): {self.height} (H) x {self.width} (W)\n"\
+            f"DPI: {round(self.dpi, 4)}\n"\
+            f"Size (mm): {round(self.photo_size[0], 4)} (H) x {round(self.photo_size[1], 4)} (W)\n"\
+            f"Pixel size (mm): {round(self.pixel_size[0], 4)} (H) x {round(self.pixel_size[1], 4)} (W)\n"
 
     @property
     def height(self):
