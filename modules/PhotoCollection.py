@@ -53,3 +53,8 @@ class PhotoCollection:
 
         for i, photo in enumerate(self.photos):
             photo.preview(cmap="gray", ax=ax, index=i)
+
+    def locate_fiducials(self, size, kernel_size=None, iterations=4, threshold=False, block_size=999):
+        for photo in self.photos:
+            photo.fiducials.locate(
+                size, kernel_size, iterations, threshold, block_size)
