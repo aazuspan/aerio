@@ -144,11 +144,14 @@ class Photo:
 
         self.img = cropped
 
-    def preview(self, size=(8, 8), cmap="gray"):
-        _, ax = plt.subplots(figsize=size)
-        ax.imshow(self.img, cmap=cmap)
+    def preview(self, size=(8, 8), cmap="gray", ax=None, index=None):
+        if ax is None:
+            _, ax = plt.subplots(figsize=size)
+            ax.imshow(self.img, cmap=cmap)
+        else:
+            ax[index].imshow(self.img, cmap=cmap)
 
-        self.fiducials._add_to_preview(ax)
+        self.fiducials.preview(ax=ax, index=index)
 
     def _match_histogram(self, reference):
         """

@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from modules.Photo import Photo
 
 
@@ -40,3 +41,15 @@ class PhotoCollection:
 
         for photo in self.photos:
             photo._match_histogram(reference)
+
+    def __repr__(self):
+        return repr(self.photos)
+
+    def __len__(self):
+        return len(self.photos)
+
+    def preview(self, size=(8, 8)):
+        _, ax = plt.subplots(nrows=len(self.photos), figsize=size)
+
+        for i, photo in enumerate(self.photos):
+            photo.preview(cmap="gray", ax=ax, index=i)

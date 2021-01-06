@@ -40,10 +40,10 @@ class Fiducials:
 
         return self._calculate_coordinates(kernel_size, iterations, threshold, block_size)
 
-    def _add_to_preview(self, ax):
+    def preview(self, ax=None, index=None):
         for fiducial in self.fiducials:
             if fiducial:
-                fiducial._add_to_preview(ax)
+                fiducial.preview(ax=ax, index=index)
 
     def _crop_fiducials(self, size):
         """

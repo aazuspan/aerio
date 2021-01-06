@@ -10,20 +10,6 @@ class Fiducial:
         self._position = position
         self._coordinates = None
 
-    def preview(self, size=(4, 4), cmap="gray", filtered=False):
-        _, ax = plt.subplots(figsize=size)
-
-        if filtered and self._filtered is not None:
-            img = self._filtered
-        else:
-            img = self.img
-
-        ax.imshow(img, cmap=cmap)
-
-        if self._coordinates:
-            ax.plot(self._coordinates[0], self._coordinates[1],
-                    marker="+", color="yellow", markersize=20)
-
     def _filter(self, kernel_size, iterations, threshold, block_size):
         """
         Use morphological opening and adaptive thresholding to filter an image 
@@ -75,8 +61,29 @@ class Fiducial:
     def coordinates(self):
         return self._image_coordinates
 
-    def _add_to_preview(self, ax):
-        coord = self.coordinates
-        if coord:
-            ax.plot(coord[0], coord[1], marker="+",
-                    color="yellow", markersize=20)
+    def preview(self, size=(4, 4), cmap="gray", filtered=False, ax=None, index=None):
+        if ax is None:
+            _, ax = plt.subplots(figsize=size)
+
+            if filtered and self._filtered is not None:
+                img = self._filtered
+            else:
+                img = self.img
+
+            ax.imshow(img, cmap=cmap)
+
+            if self.coordinates:
+                ax.plot(self._coordinates[0], self._coordinates[1],
+                        marker="+", color="yellow", markersize=20)
+
+        # Add to an existing single plot
+        elif index is None:
+            if self.coordinates:
+                ax.plot(self.coordinates[0], self.coordinates[1],
+                        marker="+", color="yellow", markersize=20)
+
+        # Add to an existing subplot
+        else:
+            if self.coordinates:
+                ax[index].plot(self.coordinates[0], self.coordinates[1],
+                               marker="+", color="yellow", markersize=20)
