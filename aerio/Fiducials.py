@@ -1,6 +1,6 @@
 import numpy as np
 
-from modules.Fiducial import Fiducial
+from aerio.Fiducial import Fiducial
 
 
 # This class manages all of the fiducials for a single photo

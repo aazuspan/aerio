@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from modules.Photo import Photo
+from aerio.Photo import Photo
 
 
 class PhotoCollection:

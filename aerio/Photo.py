@@ -6,7 +6,7 @@ import numpy as np
 import statistics
 from skimage.exposure import match_histograms
 
-from modules.Fiducials import Fiducials
+from aerio.Fiducials import Fiducials
 
 
 # TODO: Allow directly loading cv2.imread images
