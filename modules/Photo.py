@@ -1,12 +1,14 @@
+import copy
 import cv2
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 import statistics
 
 from modules.Fiducials import Fiducials
 
 
-# TODO: Raise warning if fiducial coordinates can't be located. Format coordinates for Agisoft.
+# TODO: Allow directly loading cv2.imread images
 class Photo:
     def __init__(self, path, dpi=None, photo_size=None, pixel_size=None):
         self.path = path
@@ -128,6 +130,20 @@ class Photo:
         Return the file extension
         """
         return os.path.splitext(os.path.basename(self.path))[1]
+
+    def crop(self, height, width, fill=0):
+        """
+        Crop the image to a new size, anchored at the top left. If the crop size
+        is larger than the current image, new pixels will be added with the fill value.
+        """
+        cropped = np.full((height, width), fill)
+
+        copy_height = min(height, self.img.shape[0])
+        copy_width = min(width, self.img.shape[1])
+
+        cropped[0:copy_height, 0:copy_width] = self.img[0:copy_height, 0:copy_width]
+
+        self.img = cropped
 
     def preview(self, size=(8, 8), cmap="gray"):
         _, ax = plt.subplots(figsize=size)
