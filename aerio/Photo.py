@@ -158,3 +158,25 @@ class Photo:
         Match the photo histogram to a reference photo.
         """
         self.img = match_histograms(self.img, reference.img)
+
+    def border_box(self, width):
+        """
+        Return the bounding box of the image border at a given width
+        """
+        exterior = [
+            [0, 0],
+            [self.width, 0],
+            [self.width, self.height],
+            [0, self.height],
+            [0, 0]
+        ]
+
+        interior = [
+            [width, width],
+            [self.width - width, width],
+            [self.width - width, self.height - width],
+            [width, self.height - width],
+            [width, width]
+        ]
+
+        return exterior + interior
