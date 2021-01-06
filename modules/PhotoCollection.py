@@ -30,3 +30,13 @@ class PhotoCollection:
 
     def __getitem__(self, i):
         return self.photos[i]
+
+    def match_histograms(self, reference_index=0):
+        """
+        Histogram match all photos, using one of the photos as a reference. 
+        @param {int, default 0} reference_index The index of the photo to use as reference.
+        """
+        reference = self.photos[reference_index]
+
+        for photo in self.photos:
+            photo._match_histogram(reference)

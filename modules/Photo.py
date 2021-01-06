@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import statistics
+from skimage.exposure import match_histograms
 
 from modules.Fiducials import Fiducials
 
@@ -150,3 +151,9 @@ class Photo:
         ax.imshow(self.img, cmap=cmap)
 
         self.fiducials._add_to_preview(ax)
+
+    def _match_histogram(self, reference):
+        """
+        Match the photo histogram to a reference photo.
+        """
+        self.img = match_histograms(self.img, reference.img)
