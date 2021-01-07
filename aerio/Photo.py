@@ -6,7 +6,9 @@ import numpy as np
 import statistics
 from skimage.exposure import match_histograms
 
+from aerio.BoundingBoxCollection import BoundingBoxCollection
 from aerio.Fiducials import Fiducials
+from aerio import utils
 
 
 # TODO: Allow directly loading cv2.imread images
@@ -180,4 +182,12 @@ class Photo:
             [width, width]
         ]
 
-        return exterior + interior
+        return BoundingBoxCollection([exterior + interior], self)
+
+    def save(self, path, suffix="_processed", dtype=np.uint8):
+        out_path = os.path.join(path, self.filename + self.extension)
+        out_path = utils.add_suffix(out_path, suffix)
+
+        self.img = dtype(self.img)
+
+        cv2.imwrite(out_path, self.img)

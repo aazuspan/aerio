@@ -59,3 +59,16 @@ class PhotoCollection:
         for photo in self.photos:
             photo.fiducials.locate(
                 size, kernel_size, iterations, threshold, block_size)
+
+    @property
+    def images(self):
+        """
+        Return the image arrays from all photos in the collection
+        """
+        return [photo.img for photo in self.photos]
+
+    def save(self, path, suffix="_processed", dtype=np.uint8):
+        """
+        Save all photo images to hard drive
+        """
+        [photo.save(path, suffix, dtype) for photo in self.photos]

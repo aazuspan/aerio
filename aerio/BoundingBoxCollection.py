@@ -1,8 +1,10 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from aerio.BoundingBox import BoundingBox
+from aerio import utils
 
 
 class BoundingBoxCollection:
@@ -52,6 +54,17 @@ class BoundingBoxCollection:
 
         for box in self.boxes:
             cv2.fillPoly(mask, pts=[box.coords], color=fg, lineType=None)
+
+        return mask
+
+    def save_mask(self, path, suffix="_mask", bg=255, fg=0, dtype=np.uint8):
+        out_path = os.path.join(
+            path, self.photo.filename + self.photo.extension)
+        out_path = utils.add_suffix(out_path, suffix)
+
+        mask = self.generate_mask(bg, fg, dtype)
+
+        cv2.imwrite(out_path, mask)
 
         return mask
 
