@@ -1,17 +1,18 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from aerio.Photo import Photo
 
 
 class PhotoCollection:
-    def __init__(self, photo_paths, dpi=None, photo_size=None, pixel_size=None):
+    def __init__(self, photo_paths, dpi=None, photo_size=None, pixel_size=None, dtype=np.uint8):
         self.photos = self._load_photos(
-            photo_paths, dpi, photo_size, pixel_size)
+            photo_paths, dpi, photo_size, pixel_size, dtype)
 
-    def _load_photos(self, photo_paths, dpi, photo_size, pixel_size):
+    def _load_photos(self, photo_paths, dpi, photo_size, pixel_size, dtype):
         """
         Instantiate and return all photos
         """
-        photos = [Photo(path, dpi, photo_size, pixel_size)
+        photos = [Photo(path, dpi, photo_size, pixel_size, dtype)
                   for path in photo_paths]
 
         return photos

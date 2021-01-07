@@ -11,9 +11,10 @@ from aerio.Fiducials import Fiducials
 
 # TODO: Allow directly loading cv2.imread images
 class Photo:
-    def __init__(self, path, dpi=None, photo_size=None, pixel_size=None):
+    def __init__(self, path, dpi=None, photo_size=None, pixel_size=None, dtype=np.uint8):
         self.path = path
-        self.img = cv2.imread(self.path, 0)
+        self.img = dtype(cv2.imread(self.path, cv2.IMREAD_GRAYSCALE))
+        self.dtype = dtype
 
         self._dpi = dpi
         self._photo_size = photo_size
@@ -157,7 +158,7 @@ class Photo:
         """
         Match the photo histogram to a reference photo.
         """
-        self.img = match_histograms(self.img, reference.img)
+        self.img = self.dtype(match_histograms(self.img, reference.img))
 
     def border_box(self, width):
         """
