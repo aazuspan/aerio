@@ -54,7 +54,7 @@ class BoundingBox:
         return self.height / self.width
 
     @property
-    def distance_from_edge(self):
+    def edge_distance(self):
         """
         Calculate the minimum distance to an edge of the container
         """

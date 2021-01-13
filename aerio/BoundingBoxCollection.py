@@ -22,14 +22,14 @@ class BoundingBoxCollection:
             if self.photo != other.photo:
                 raise ValueError(
                     "To combine two BoundingBoxCollections, they must use the same photo.")
-            other_boxes = self.load_boxes(other.boxes)
+            other_boxes = self._load_boxes(other.boxes)
         elif isinstance(other, (list, tuple, np.ndarray)):
-            other_boxes = self.load_boxes(other)
+            other_boxes = self._load_boxes(other)
         else:
             raise ValueError("A BoundingBoxCollection can only be combined with another BoundingBoxCollection"
                              " or a list of coordinate lists.")
 
-        return BoundingBoxCollection(self.boxes + other_boxes, self.photo)
+        return BoundingBoxCollection(np.concatenate((self.boxes, other_boxes)), self.photo)
 
     def __getitem__(self, i):
         return self.boxes[i]
@@ -50,7 +50,7 @@ class BoundingBoxCollection:
                 box = np.squeeze(box)
                 loaded.append(BoundingBox(box, self))
 
-        return loaded
+        return np.array(loaded)
 
     def generate_mask(self, bg=255, fg=0, dtype=np.uint8):
         """
@@ -80,21 +80,28 @@ class BoundingBoxCollection:
         """
         Remove all boxes that don't match specified criteria
         """
-        self._filter_area((min_area, max_area))
-        self._filter_edge_distance((min_edge_distance, max_edge_distance))
-        self._filter_hw_ratio((min_hw_ratio, max_hw_ratio))
+        filtered_boxes = self.boxes.copy()
 
-    def _filter_edge_distance(self, range):
-        self.boxes = [box for box in self.boxes if box.distance_from_edge >
-                      range[0] and box.distance_from_edge < range[1]]
+        areas = [box.area for box in filtered_boxes]
+        filtered_boxes = self._filter_boxes(
+            filtered_boxes, min_area, max_area, areas)
 
-    def _filter_area(self, range):
-        self.boxes = [box for box in self.boxes if box.area >
-                      range[0] and box.area < range[1]]
+        edge_distances = [box.edge_distance for box in filtered_boxes]
+        filtered_boxes = self._filter_boxes(
+            filtered_boxes, min_edge_distance, max_edge_distance, edge_distances)
 
-    def _filter_hw_ratio(self, range):
-        self.boxes = [box for box in self.boxes if box.hw_ratio >
-                      range[0] and box.hw_ratio < range[1]]
+        hw_ratios = [box.hw_ratio for box in filtered_boxes]
+        filtered_boxes = self._filter_boxes(
+            filtered_boxes, min_hw_ratio, max_hw_ratio, hw_ratios)
+
+        self.boxes = filtered_boxes
+
+    def _filter_boxes(self, boxes, min_val, max_val, vals):
+        """
+        Filter boxes based on a list of box attributes and an allowable range.
+        """
+        filter_vector = np.greater(vals, min_val) & np.less(vals, max_val)
+        return boxes[filter_vector]
 
     def preview(self, size=(8, 8), color=(0, 255, 0), line_width=2):
         img = self.photo.img.copy()
@@ -143,6 +150,6 @@ class BoundingBoxCollection:
         contours, _ = cv2.findContours(
             working_array, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-        boxes = self.load_boxes(contours)
+        boxes = self._load_boxes(contours)
 
         return boxes
