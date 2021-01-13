@@ -38,7 +38,7 @@ class Fiducial:
 
         self._coordinates = self._locate_corner()
 
-        return self._image_coordinates
+        return self.coordinates
 
     def _locate_corner(self):
         """
@@ -51,15 +51,11 @@ class Fiducial:
         return (corner[0][0][0], corner[0][0][1])
 
     @property
-    def _image_coordinates(self):
+    def coordinates(self):
         """
         Convert the local cropped coordinates to coordinates within the image.
         """
         return (self._position[1] + self._coordinates[0], self._position[0] + self._coordinates[1])
-
-    @property
-    def coordinates(self):
-        return self._image_coordinates
 
     def preview(self, size=(4, 4), cmap="gray", filtered=False, ax=None, index=None):
         if ax is None:
