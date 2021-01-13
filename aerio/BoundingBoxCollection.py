@@ -109,8 +109,10 @@ class BoundingBoxCollection:
         img = self.photo.img.copy()
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
-        fills = np.zeros(img.shape, dtype=np.uint8)
-        lines = np.zeros(img.shape, dtype=np.uint8)
+        # Promote pixel depth to allow filling with any 8-bit value. If these were np.zeros, then filling
+        # with black would confuse the mask generation.
+        fills = np.full(img.shape, (256, 256, 256), dtype=np.uint16)
+        lines = np.full(img.shape, (256, 256, 256), dtype=np.uint16)
 
         for box in self.boxes:
             if box:
