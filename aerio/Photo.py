@@ -184,6 +184,13 @@ class Photo:
 
         return BoundingBoxCollection([exterior + interior], self)
 
+    def fiducial_boxes(self, size):
+        """
+        Return the bounding boxes around the side fiducials.
+        """
+        boxes = self.fiducials.get_fiducial_bboxes(size)
+        return BoundingBoxCollection(boxes, self)
+
     def save(self, path, suffix="_processed", dtype=np.uint8):
         out_path = os.path.join(path, self.filename + self.extension)
         out_path = utils.add_suffix(out_path, suffix)

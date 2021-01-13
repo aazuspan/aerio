@@ -48,8 +48,7 @@ class BoundingBoxCollection:
                 loaded.append(box)
             elif isinstance(box, (list, tuple, np.ndarray)):
                 box = np.squeeze(box)
-                loaded.append(BoundingBox(box, self))
-
+                loaded.append(BoundingBox(box, self.photo.img))
         return np.array(loaded)
 
     def generate_mask(self, bg=255, fg=0, dtype=np.uint8):
@@ -103,14 +102,15 @@ class BoundingBoxCollection:
         filter_vector = np.greater(vals, min_val) & np.less(vals, max_val)
         return boxes[filter_vector]
 
-    def preview(self, size=(8, 8), color=(0, 255, 0), line_width=2):
+    def preview(self, size=(8, 8), line_color=(255, 0, 0), fill_color=(255, 0, 0), line_width=2, line_alpha=1, fill_alpha=0.25):
         img = self.photo.img.copy()
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
         # Add the boxes to the image
         for box in self.boxes:
             if box:
-                box.preview(img, color, line_width)
+                img = box.preview(img, line_color, fill_color,
+                                  line_width, line_alpha, fill_alpha)
 
         _, ax = plt.subplots(figsize=size)
         ax.imshow(img)

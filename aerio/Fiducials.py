@@ -1,5 +1,6 @@
 import numpy as np
 
+from aerio.BoundingBox import BoundingBox
 from aerio.Fiducial import Fiducial
 
 
@@ -45,18 +46,66 @@ class Fiducials:
             if fiducial:
                 fiducial.preview(ax=ax, index=index)
 
-    def _crop_fiducials(self, size):
+    def get_fiducial_bboxes(self, size):
         """
-        Extract, instantiate, and return all four fiducials
+        Return a list of Bounding Boxes containing the fiducials
         """
-        fiducials = []
+        boxes = []
 
         for position in [self.TOP, self.RIGHT, self.BOTTOM, self.LEFT]:
             bbox = self._get_fiducial_bbox(self.img, position, size)
-            crop = self.img[bbox[0]:bbox[1], bbox[2]:bbox[3]]
+            boxes.append(bbox)
+
+        return boxes
+
+    def _get_fiducial_bbox(self, img, position, size):
+        """
+        Generate a bounding box for a fiducial
+        """
+        img_width = img.shape[0]
+        img_height = img.shape[1]
+
+        if position in [self.TOP, self.BOTTOM]:
+            left = img_width // 2 - size[1] // 2
+            right = img_width // 2 + size[1] // 2
+
+            if position == self.TOP:
+                top = 0
+                bottom = size[0]
+            else:
+                top = img_height - size[0]
+                bottom = img_height
+
+        elif position in [self.RIGHT, self.LEFT]:
+            top = img_height // 2 - size[1] // 2
+            bottom = img_height // 2 + size[1] // 2
+
+            if position == self.RIGHT:
+                left = img_width - size[0]
+                right = img_width
+            else:
+                left = 0
+                right = size[0]
+
+        coords = [
+            [left, top],
+            [right, top],
+            [right, bottom],
+            [left, bottom]
+        ]
+
+        return BoundingBox(np.array(coords), self.img)
+
+    def _crop_fiducials(self, size):
+        fiducial_boxes = self.get_fiducial_bboxes(size)
+
+        fiducials = []
+        for box in fiducial_boxes:
+            extent = box.extent
+            crop = self.img[extent[0]:extent[1], extent[2]:extent[3]]
             # Top-left corner coordinates for the fiducial
-            position = (bbox[0], bbox[2])
-            fiducials.append(Fiducial(crop, position))
+            corner = (extent[0], extent[2])
+            fiducials.append(Fiducial(crop, corner))
 
         return fiducials
 
@@ -88,34 +137,3 @@ class Fiducials:
                 coordinates.append(fiducial.coordinates)
 
         return coordinates
-
-    def _get_fiducial_bbox(self, img, position, size):
-        """
-        Calculate the coordinates of the bounding box for a fiducial.
-        """
-        img_width = img.shape[0]
-        img_height = img.shape[1]
-
-        if position in [self.TOP, self.BOTTOM]:
-            left = img_width // 2 - size[1] // 2
-            right = img_width // 2 + size[1] // 2
-
-            if position == self.TOP:
-                top = 0
-                bottom = size[0]
-            else:
-                top = img_height - size[0]
-                bottom = img_height
-
-        elif position in [self.RIGHT, self.LEFT]:
-            top = img_height // 2 - size[1] // 2
-            bottom = img_height // 2 + size[1] // 2
-
-            if position == self.RIGHT:
-                left = img_width - size[0]
-                right = img_width
-            else:
-                left = 0
-                right = size[0]
-
-        return (top, bottom, left, right)

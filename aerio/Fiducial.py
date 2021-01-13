@@ -7,6 +7,7 @@ class Fiducial:
     def __init__(self, img, position):
         self.img = img
         self._filtered = None
+        # Top-left corner coordinates in image
         self._position = position
         self._coordinates = None
 
