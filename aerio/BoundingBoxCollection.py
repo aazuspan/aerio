@@ -103,14 +103,30 @@ class BoundingBoxCollection:
         return boxes[filter_vector]
 
     def preview(self, size=(8, 8), line_color=(255, 0, 0), fill_color=(255, 0, 0), line_width=2, line_alpha=1, fill_alpha=0.25):
+        """
+        Draw fills and outlines of each bounding box. Then blend them onto the photo image and display it.
+        """
         img = self.photo.img.copy()
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
-        # Add the boxes to the image
+        fills = np.zeros(img.shape, dtype=np.uint8)
+        lines = np.zeros(img.shape, dtype=np.uint8)
+
         for box in self.boxes:
             if box:
-                img = box.preview(img, line_color, fill_color,
-                                  line_width, line_alpha, fill_alpha)
+                box._draw(fills, lines, line_color, fill_color, line_width)
+
+        # Mask the pixels that contain fills or lines
+        fill_mask = np.all(fills == fill_color, axis=-1)
+        line_mask = np.all(lines == line_color, axis=-1)
+
+        # Blend the fill with the original image
+        img[fill_mask] = (fills[fill_mask] *
+                          fill_alpha) + (img[fill_mask] * (1 - fill_alpha))
+
+        # Blend the lines with the blended image
+        img[line_mask] = (lines[line_mask] *
+                          line_alpha) + (img[line_mask] * (1 - line_alpha))
 
         _, ax = plt.subplots(figsize=size)
         ax.imshow(img)

@@ -76,29 +76,11 @@ class BoundingBox:
 
         return (top, bottom, left, right)
 
-    def preview(self, img, line_color, fill_color, line_width, line_alpha, fill_alpha):
+    def _draw(self, fills, lines, line_color, fill_color, line_width):
         """
-        Blend the fill and outline of the box onto the original image and return it
+        Draw bounding box fills and lines onto arrays
         """
-        img_copy = img.copy()
-
-        fill_img = np.zeros(img_copy.shape, dtype=np.uint8)
-        cv2.fillPoly(fill_img, pts=[self.coords],
+        cv2.fillPoly(fills, pts=[self.coords],
                      color=fill_color, lineType=None)
 
-        fill_mask = np.all(fill_img == fill_color, axis=-1)
-
-        # Blend the fill with the original image
-        img_copy[fill_mask] = (fill_img[fill_mask] *
-                               fill_alpha) + (img[fill_mask] * (1 - fill_alpha))
-
-        line_img = np.zeros(img_copy.shape, dtype=np.uint8)
-        cv2.polylines(line_img, [self.coords], True, line_color, line_width)
-
-        line_mask = np.all(line_img == line_color, axis=-1)
-
-        # Blend the lines with the blended image
-        img_copy[line_mask] = (line_img[line_mask] *
-                               line_alpha) + (img_copy[line_mask] * (1 - line_alpha))
-
-        return img_copy
+        cv2.polylines(lines, [self.coords], True, line_color, line_width)
