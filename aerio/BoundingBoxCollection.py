@@ -50,10 +50,7 @@ class BoundingBoxCollection:
         """
         Convert the bounding boxes to a raster mask
         """
-        mask = np.full(self.photo.img.shape, fill_value=bg, dtype=dtype)
-
-        for box in self.boxes:
-            cv2.fillPoly(mask, pts=[box.coords], color=fg, lineType=None)
+        mask = self._bbox_to_array(self.boxes, bg, fg, dtype)
 
         return mask
 
@@ -119,7 +116,33 @@ class BoundingBoxCollection:
         mask_collapsed = cv2.morphologyEx(
             mask, cv2.MORPH_OPEN, kernel, iterations)
 
-        contours, _ = cv2.findContours(
-            255 - mask_collapsed, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        self.boxes = self._array_to_bbox(mask_collapsed)
 
-        self.boxes = self.load_boxes(contours)
+    def _bbox_to_array(self, bbox, bg=255, fg=0, dtype=np.uint8):
+        """
+        Convert a list of Bounding Box objects into a 2D array. Boxes will be
+        filled with the foreground value.
+        """
+        array = np.full(self.photo.img.shape, fill_value=bg, dtype=dtype)
+
+        for box in bbox:
+            cv2.fillPoly(array, pts=[box.coords], color=fg, lineType=None)
+
+        return array
+
+    def _array_to_bbox(self, array, bg=255, fg=0):
+        """
+        Convert an 2D array into a list of Bounding Box objects. The foreground
+        values will become the boxes.
+        """
+        working_array = array.copy()
+        # CV2 wants black background with white objects
+        working_array[array == bg] = 0
+        working_array[array == fg] = 255
+
+        contours, _ = cv2.findContours(
+            working_array, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        boxes = self.load_boxes(contours)
+
+        return boxes
