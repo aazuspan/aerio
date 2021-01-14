@@ -24,11 +24,6 @@ class Photo:
 
         self._fiducials = Fiducials(self.img)
 
-        if self._is_underdefined():
-            raise AttributeError("This photo is under-defined. You must specify"
-                                 " either dpi, photo_size, or pixel_size so that"
-                                 " others can be calculated.")
-
     @property
     def fiducials(self):
         return self._fiducials
@@ -46,6 +41,9 @@ class Photo:
         """
         Return scanning dots per inch.
         """
+        if self._is_underdefined():
+            return None
+
         if self._dpi:
             return self._dpi
 
@@ -59,6 +57,9 @@ class Photo:
         """
         Return photo size (height, width) in millimeters.
         """
+        if self._is_underdefined():
+            return None
+
         if self._photo_size:
             h, w = self._photo_size
 
@@ -75,6 +76,9 @@ class Photo:
         """
         Return pixel size (height, width) in millimeters.
         """
+        if self._is_underdefined():
+            return None
+
         if self._pixel_size:
             h, w = self._pixel_size
 
@@ -91,15 +95,31 @@ class Photo:
         """
         Convert dots per inch to dots per millimeter
         """
+        if self._is_underdefined():
+            return None
+
         return self.dpi / 25.4
 
-    # Print out all of the photo specs
     def __repr__(self):
+        """
+        Print out photo specs if they're available.
+        """
+        if not self._is_underdefined():
+            height = self.height
+            width = self.width
+            dpi = round(self.dpi, 4)
+            photo_height = round(self.photo_size[0], 4)
+            photo_width = round(self.photo_size[1], 4)
+            pixel_height = round(self.pixel_size[0], 4)
+            pixel_width = round(self.pixel_size[1], 4)
+        else:
+            height = width = dpi = photo_height = photo_width = pixel_height = pixel_width = "Undefined"
+
         return f"{self.filename}\n"\
-            f"Resolution (px): {self.height} (H) x {self.width} (W)\n"\
-            f"DPI: {round(self.dpi, 4)}\n"\
-            f"Size (mm): {round(self.photo_size[0], 4)} (H) x {round(self.photo_size[1], 4)} (W)\n"\
-            f"Pixel size (mm): {round(self.pixel_size[0], 4)} (H) x {round(self.pixel_size[1], 4)} (W)\n"
+            f"Resolution (px): {height} (H) x {width} (W)\n"\
+            f"DPI: {dpi}\n"\
+            f"Size (mm): {photo_height} (H) x {photo_width} (W)\n"\
+            f"Pixel size (mm): {pixel_height} (H) x {pixel_width} (W)\n"
 
     @property
     def height(self):
